@@ -1,0 +1,12 @@
+add_compile_options(-Wall -Werror)
+set(CMAKE_CXX_FLAGS "-O0 -g -fPIC")
+
+add_subdirectory(client)
+add_subdirectory(dms)
+add_subdirectory(ixm)
+add_subdirectory(mon)
+add_subdirectory(msg)
+add_subdirectory(oss)
+add_subdirectory(pd)
+add_subdirectory(pmd)
+add_subdirectory(rtn)

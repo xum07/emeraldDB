@@ -1,0 +1,12 @@
+add_compile_options(-Werror)
+
+add_subdirectory(client)
+add_subdirectory(dms)
+add_subdirectory(ixm)
+add_subdirectory(mon)
+add_subdirectory(msg)
+add_subdirectory(oss)
+add_subdirectory(pd)
+add_subdirectory(pmd)
+add_subdirectory(rtn)
+add_subdirectory(utils)
