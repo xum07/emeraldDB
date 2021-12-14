@@ -9,12 +9,13 @@ The implements of this project have some differences from the lecture, such as:
 3. some improvement of the ways to using CPP
 
 # project structure
-The function of all folder in `src`
+All source codes are in `src` folder, and there are some help information about this project in `doc` folder.
+
+The function of all folder in `src` blew:
 ```shell
 ├── client
 ├── dms     data manage service
 ├── driver
-├── include
 ├── ixm     index manager
 ├── mon     monitor
 ├── msg     message

@@ -4,6 +4,8 @@ project(emeraldDB)
 add_compile_options(-Wall)
 set(CMAKE_CXX_FLAGS "-O0 -g -fPIC")
 
+include_directories(include)
+
 add_subdirectory(opensource)
 add_subdirectory(src)
 add_subdirectory(test)
