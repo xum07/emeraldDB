@@ -1,5 +1,6 @@
 #include "Socket.h"
 #include <iostream>
+#include <memory>
 #include <netdb.h>
 #include <netinet/tcp.h>
 #include <unistd.h>
@@ -13,7 +14,7 @@ constexpr int LINGER_TURN_ON = 1;
 constexpr int MAX_RECEIVE_RETRY_TIMES = 5;
 
 Socket::Socket(uint32_t port, std::chrono::microseconds timeout)
-        : _localAddr(), _peerAddr(), _peerAddrLen(sizeof(_peerAddr))
+    : _localAddr(), _peerAddr(), _peerAddrLen(sizeof(_peerAddr))
 {
     _timeout = timeout;
     _localAddr.sin_family = AF_INET;
@@ -29,7 +30,7 @@ Socket::Socket(const std::string &hostName, uint32_t port, std::chrono::microsec
 }
 
 Socket::Socket(int fd, std::chrono::microseconds timeout)
-        : _localAddrLen(sizeof(_localAddr)), _peerAddr(), _peerAddrLen(sizeof(_peerAddr))
+    : _localAddrLen(sizeof(_localAddr)), _peerAddr(), _peerAddrLen(sizeof(_peerAddr))
 {
     _fd = fd;
     _init = true;
@@ -64,9 +65,11 @@ int Socket::InitSocket()
     return EDB_OK;
 }
 
-int Socket::SetSocketLinger(int onOff, int linger)
+int Socket::SetSocketLinger(int onOff, int linger) const
 {
-    struct linger lg{onOff, linger};
+    struct linger lg {
+        onOff, linger
+    };
     auto ret = setsockopt(_fd, SOL_SOCKET, SO_LINGER, &lg, sizeof(lg));
     return ret;
 }
@@ -78,7 +81,7 @@ void Socket::SetAddress(const std::string &hostName, uint32_t port)
     _peerAddrLen = sizeof(_peerAddr);
     auto ht = gethostbyname(hostName.data());
     _localAddr.sin_addr.s_addr = (ht != nullptr) ? *(reinterpret_cast<uint32_t *>(ht->h_addr_list[0]))
-                                                 : inet_addr(hostName.data());
+                                                    : inet_addr(hostName.data());
     _localAddr.sin_family = AF_INET;
     _localAddr.sin_port = htons(port);
     _localAddrLen = sizeof(_localAddr);
@@ -146,7 +149,7 @@ int Socket::Send(const char *msg, int len, std::chrono::microseconds timeout, in
     return EDB_OK;
 }
 
-bool Socket::IsConnected()
+bool Socket::IsConnected() const
 {
     int ret = send(_fd, "", 0, MSG_NOSIGNAL);
     return ret >= 0;
@@ -181,7 +184,7 @@ int Socket::Receive(char *msg, int len, std::chrono::microseconds timeout, int f
             return EDB_NETWORK_CLOSE;
         } else {
             ret = errno;
-            if (((ret == EAGAIN) || (ret == EWOULDBLOCK)) && (_timeout.count() > 0)) {
+            if ((ret == EAGAIN) && (_timeout.count() > 0)) {
                 // if timeout, message is partial so we should restart
                 std::cout << "receive timeout: ret=" << ret << std::endl;
                 return EDB_NETWORK;
@@ -220,7 +223,7 @@ int Socket::ReceiveWithoutFlag(char *msg, int len, std::chrono::microseconds tim
         return EDB_NETWORK_CLOSE;
     } else if (ret < 0) {
         ret = errno;
-        if (((ret == EAGAIN) || (ret == EWOULDBLOCK)) && (_timeout.count() > 0)) {
+        if ((ret == EAGAIN) && (_timeout.count() > 0)) {
             // if timeout, message is partial so we should restart
             std::cout << "receive timeout: ret=" << ret << std::endl;
             return EDB_NETWORK;
@@ -259,12 +262,12 @@ int Socket::Connect()
 void Socket::Close()
 {
     if (_init) {
-        (void) close(_fd);
+        (void)close(_fd);
         _init = false;
     }
 }
 
-int Socket::Accept(int *sock, struct sockaddr *addr, socklen_t *addrlen, std::chrono::microseconds timeout)
+int Socket::Accept(int &sock, struct sockaddr *addr, socklen_t *addrlen, std::chrono::microseconds timeout)
 {
     auto ret = IsSocketReady(timeout);
     if (ret != EDB_OK) {
@@ -272,8 +275,8 @@ int Socket::Accept(int *sock, struct sockaddr *addr, socklen_t *addrlen, std::ch
         return ret;
     }
 
-    *sock = accept(_fd, addr, addrlen);
-    if (*sock == -1) {
+    sock = accept(_fd, addr, addrlen);
+    if (sock == -1) {
         std::cout << "failed to accept socket, ret=" << errno << std::endl;
         return EDB_NETWORK;
     }
@@ -302,16 +305,22 @@ uint32_t Socket::GetPort(sockaddr_in *addr)
     return ntohs(addr->sin_port);
 }
 
-int Socket::TransAddr2Host(sockaddr_in *addr, char *host, uint32_t hostLen)
+int Socket::TransAddr2Host(sockaddr_in *addr, std::string &host)
 {
-    hostLen = (hostLen < NI_MAXHOST) ? hostLen : NI_MAXHOST;
-    auto ret = getnameinfo(reinterpret_cast<sockaddr *>(addr), sizeof(addr), host,
-                           hostLen, nullptr, 0, NI_NUMERICHOST);
+    auto tmpHost = std::make_unique<char[]>(NI_MAXHOST);
+    if (!tmpHost) {
+        std::cout << "failed to malloc, size:" << NI_MAXHOST << std::endl;
+        return EDB_ERR;
+    }
+
+    auto ret = getnameinfo(reinterpret_cast<sockaddr *>(addr), sizeof(addr), tmpHost.get(), NI_MAXHOST, nullptr, 0,
+                           NI_NUMERICHOST);
     if (ret != 0) {
         std::cout << "failed to getnameinfo, ret=" << errno << std::endl;
         return EDB_NETWORK;
     }
 
+    host = std::string(tmpHost.get());
     return EDB_OK;
 }
 
@@ -325,19 +334,21 @@ uint32_t Socket::GetPeerPort()
     return GetPort(&_peerAddr);
 }
 
-uint32_t Socket::GetLocalHost(char *host, uint32_t hostLen)
+uint32_t Socket::GetLocalHost(std::string &host)
 {
-    return TransAddr2Host(&_localAddr, host, hostLen);
+    return TransAddr2Host(&_localAddr, host);
 }
 
-uint32_t Socket::GetPeerHost(char *host, uint32_t hostLen)
+uint32_t Socket::GetPeerHost(std::string &host)
 {
-    return TransAddr2Host(&_peerAddr, host, hostLen);
+    return TransAddr2Host(&_peerAddr, host);
 }
 
 int Socket::SetTimeout(std::chrono::seconds timeout)
 {
-    struct timeval tv{timeout.count(), 0};
+    struct timeval tv {
+        timeout.count(), 0
+    };
     auto ret = setsockopt(_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
     if (ret) {
         std::cout << "failed to setsockopt, ret=" << errno << std::endl;
@@ -350,9 +361,17 @@ int Socket::SetTimeout(std::chrono::seconds timeout)
     return EDB_OK;
 }
 
-int Socket::GetHostName(char *name, size_t nameLen)
+int Socket::GetHostName(std::string &name)
 {
-    return gethostname(name, nameLen);
+    char tmpName[HOST_NAME_MAX] = {0};
+    auto ret = gethostname(tmpName, sizeof(tmpName));
+    if (ret != 0) {
+        std::cout << "failed to gethostname" << std::endl;
+        return ret;
+    }
+
+    name = std::string(tmpName);
+    return 0;
 }
 
 void Socket::GetPort(const std::string &serviceName, uint16_t &port)
@@ -364,7 +383,7 @@ void Socket::GetPort(const std::string &serviceName, uint16_t &port)
 int Socket::IsSocketReady(std::chrono::microseconds &timeout)
 {
     constexpr int SECOND_TO_MICROSECOND = 1000000;
-    struct timeval maxSelectTime;
+    struct timeval maxSelectTime{};
     maxSelectTime.tv_sec = duration_cast<seconds>(timeout).count() / SECOND_TO_MICROSECOND;
     maxSelectTime.tv_usec = timeout.count() % SECOND_TO_MICROSECOND;
 

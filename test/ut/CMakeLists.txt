@@ -1,7 +1,5 @@
 add_compile_options(-Werror)
 
-include_directories(${PROJECT_SOURCE_DIR}/src)
-
 add_subdirectory(client)
 add_subdirectory(dms)
 add_subdirectory(ixm)
@@ -11,4 +9,13 @@ add_subdirectory(oss)
 add_subdirectory(pd)
 add_subdirectory(pmd)
 add_subdirectory(rtn)
-add_subdirectory(utils)
+
+add_executable(ut ut_main.cpp)
+target_include_directories(ut PRIVATE ${PROJECT_SOURCE_DIR}/src)
+target_link_libraries(ut PRIVATE
+  ${GTEST_BOTH_LIBRARIES}
+  GTest::gmock
+  GTest::gmock_main
+  pthread
+  oss_test
+)

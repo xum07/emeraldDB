@@ -16,38 +16,38 @@ class Socket {
 public:
     Socket() : _localAddr(), _localAddrLen(sizeof(_localAddr)), _peerAddr(), _peerAddrLen(sizeof(_peerAddr)) {};
     // create a listening socket
-    Socket(uint32_t port, std::chrono::microseconds timeout = ZERO_TIMEOUT);
+    explicit Socket(uint32_t port, std::chrono::microseconds timeout = ZERO_TIMEOUT);
     // create a connecting socket
     Socket(const std::string &hostName, uint32_t port, std::chrono::microseconds timeout = ZERO_TIMEOUT);
     // create from an existing socket
-    Socket(int fd, std::chrono::microseconds timeout = ZERO_TIMEOUT);
+    explicit Socket(int fd, std::chrono::microseconds timeout = ZERO_TIMEOUT);
     ~Socket() { Close(); }
 
     int InitSocket();
     int BindAndListen();
-    int Accept(int *sock, struct sockaddr *addr, socklen_t *addrlen,
+    int Accept(int &sock, struct sockaddr *addr, socklen_t *addrlen,
                std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT);
     int Send(const char* msg, int len, std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT, int flags = 0);
     int Receive(char *msg, int len, std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT, int flags = 0);
     int ReceiveWithoutFlag(char *msg, int len, std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT);
     int Connect();
-    bool IsConnected();
+    [[nodiscard]] bool IsConnected() const;
     void Close();
 
-    int SetSocketLinger(int onOff, int linger);
+    int SetSocketLinger(int onOff, int linger) const;
     void SetAddress(const std::string &hostName, uint32_t port);
     int DisableNagle();
     uint32_t GetPeerPort();
-    uint32_t GetPeerHost(char* host, uint32_t hostLen);
+    uint32_t GetPeerHost(std::string& host);
     uint32_t GetLocalPort();
-    uint32_t GetLocalHost(char* host, uint32_t hostLen);
+    uint32_t GetLocalHost(std::string& host);
     int SetTimeout(std::chrono::seconds timeout);
-    static int GetHostName(char* name, size_t nameLen);
+    static int GetHostName(std::string& name);
     static void GetPort(const std::string &serviceName, uint16_t &port);
 
 protected:
     uint32_t GetPort(sockaddr_in *addr);
-    int TransAddr2Host(sockaddr_in *addr, char* host, uint32_t hostLen);
+    int TransAddr2Host(sockaddr_in *addr, std::string& host);
 
 private:
     int IsSocketReady(std::chrono::microseconds &timeout);

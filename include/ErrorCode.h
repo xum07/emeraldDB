@@ -1,6 +1,8 @@
 #ifndef EMERALDDB_ERRORCODE_H
 #define EMERALDDB_ERRORCODE_H
 
+#include <climits>
+
 #define EDB_OK                         0
 #define EDB_IO                        -1
 #define EDB_INVALIDARG                -2
@@ -19,5 +21,6 @@
 #define EDB_HEADER_INVALID            -15
 #define EDB_IXM_ID_NOT_EXIST          -16
 #define EDB_NO_ID                     -17
+#define EDB_ERR                       INT_MIN
 
 #endif  // EMERALDDB_ERRORCODE_H
