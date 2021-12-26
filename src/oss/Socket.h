@@ -38,9 +38,9 @@ public:
     void SetAddress(const std::string &hostName, uint32_t port);
     int DisableNagle();
     uint32_t GetPeerPort();
-    uint32_t GetPeerHost(std::string& host);
+    int GetPeerHost(std::string& host);
     uint32_t GetLocalPort();
-    uint32_t GetLocalHost(std::string& host);
+    int GetLocalHost(std::string& host);
     int SetTimeout(std::chrono::seconds timeout);
     static int GetHostName(std::string& name);
     static void GetPort(const std::string &serviceName, uint16_t &port);

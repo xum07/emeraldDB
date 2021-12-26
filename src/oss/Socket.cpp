@@ -14,7 +14,7 @@ constexpr int LINGER_TURN_ON = 1;
 constexpr int MAX_RECEIVE_RETRY_TIMES = 5;
 
 Socket::Socket(uint32_t port, std::chrono::microseconds timeout)
-    : _localAddr(), _peerAddr(), _peerAddrLen(sizeof(_peerAddr))
+        : _localAddr(), _peerAddr(), _peerAddrLen(sizeof(_peerAddr))
 {
     _timeout = timeout;
     _localAddr.sin_family = AF_INET;
@@ -30,7 +30,7 @@ Socket::Socket(const std::string &hostName, uint32_t port, std::chrono::microsec
 }
 
 Socket::Socket(int fd, std::chrono::microseconds timeout)
-    : _localAddrLen(sizeof(_localAddr)), _peerAddr(), _peerAddrLen(sizeof(_peerAddr))
+        : _localAddrLen(sizeof(_localAddr)), _peerAddr(), _peerAddrLen(sizeof(_peerAddr))
 {
     _fd = fd;
     _init = true;
@@ -67,8 +67,8 @@ int Socket::InitSocket()
 
 int Socket::SetSocketLinger(int onOff, int linger) const
 {
-    struct linger lg {
-        onOff, linger
+    struct linger lg{
+            onOff, linger
     };
     auto ret = setsockopt(_fd, SOL_SOCKET, SO_LINGER, &lg, sizeof(lg));
     return ret;
@@ -81,7 +81,7 @@ void Socket::SetAddress(const std::string &hostName, uint32_t port)
     _peerAddrLen = sizeof(_peerAddr);
     auto ht = gethostbyname(hostName.data());
     _localAddr.sin_addr.s_addr = (ht != nullptr) ? *(reinterpret_cast<uint32_t *>(ht->h_addr_list[0]))
-                                                    : inet_addr(hostName.data());
+                                                 : inet_addr(hostName.data());
     _localAddr.sin_family = AF_INET;
     _localAddr.sin_port = htons(port);
     _localAddrLen = sizeof(_localAddr);
@@ -262,7 +262,7 @@ int Socket::Connect()
 void Socket::Close()
 {
     if (_init) {
-        (void)close(_fd);
+        (void) close(_fd);
         _init = false;
     }
 }
@@ -313,8 +313,8 @@ int Socket::TransAddr2Host(sockaddr_in *addr, std::string &host)
         return EDB_ERR;
     }
 
-    auto ret = getnameinfo(reinterpret_cast<sockaddr *>(addr), sizeof(addr), tmpHost.get(), NI_MAXHOST, nullptr, 0,
-                           NI_NUMERICHOST);
+    auto ret = getnameinfo(reinterpret_cast<sockaddr *>(addr), sizeof(sockaddr), tmpHost.get(), NI_MAXHOST,
+                           nullptr, 0, NI_NUMERICHOST);
     if (ret != 0) {
         std::cout << "failed to getnameinfo, ret=" << errno << std::endl;
         return EDB_NETWORK;
@@ -334,20 +334,20 @@ uint32_t Socket::GetPeerPort()
     return GetPort(&_peerAddr);
 }
 
-uint32_t Socket::GetLocalHost(std::string &host)
+int Socket::GetLocalHost(std::string &host)
 {
     return TransAddr2Host(&_localAddr, host);
 }
 
-uint32_t Socket::GetPeerHost(std::string &host)
+int Socket::GetPeerHost(std::string &host)
 {
     return TransAddr2Host(&_peerAddr, host);
 }
 
 int Socket::SetTimeout(std::chrono::seconds timeout)
 {
-    struct timeval tv {
-        timeout.count(), 0
+    struct timeval tv{
+            timeout.count(), 0
     };
     auto ret = setsockopt(_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
     if (ret) {
