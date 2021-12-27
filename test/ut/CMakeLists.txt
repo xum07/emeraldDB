@@ -1,5 +1,7 @@
 add_compile_options(-Werror)
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/fake)
+
 add_subdirectory(client)
 add_subdirectory(dms)
 add_subdirectory(ixm)
@@ -11,11 +13,11 @@ add_subdirectory(pmd)
 add_subdirectory(rtn)
 
 add_executable(ut ut_main.cpp)
-target_include_directories(ut PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_link_libraries(ut PRIVATE
   ${GTEST_BOTH_LIBRARIES}
   GTest::gmock
   GTest::gmock_main
   pthread
   oss_test
+  client_cmd_test
 )
