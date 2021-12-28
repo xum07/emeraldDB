@@ -1,32 +1,93 @@
 #ifndef EMDB_SOCKET_FAKE_H
 #define EMDB_SOCKET_FAKE_H
 
-#include <gmock/gmock.h>
 #include "oss/Socket.h"
 
-namespace EMDB {
-class SocketMock : public Socket {
-    MOCK_METHOD0(InitSocket, int());
-    MOCK_METHOD0(BindAndListen, int());
-    MOCK_METHOD4(Accept, int(int & , struct sockaddr *, socklen_t *, std::chrono::microseconds));
-    MOCK_METHOD4(Send, int(const char*, int, std::chrono::microseconds, int));
-    MOCK_METHOD4(Receive, int(char * , int, std::chrono::microseconds, int));
-    MOCK_METHOD3(ReceiveWithoutFlag, int(char * , int, std::chrono::microseconds));
-    MOCK_METHOD0(Connect, int());
-    MOCK_METHOD0(IsConnected, bool());
-    MOCK_METHOD0(Close, void());
+namespace EMDB::ut {
+    class SocketFake : public EMDB::Socket {
+    public:
+        SocketFake() = default;
+        ~SocketFake() override = default;
+        int InitSocket() override
+        {
+            return EDB_OK;
+        }
 
-    MOCK_METHOD2(SetSocketLinger, int(int, int));
-    MOCK_METHOD2(SetAddress, int(const std::string&, uint32_t));
-    MOCK_METHOD0(DisableNagle, int());
-    MOCK_METHOD0(GetPeerPort, uint32_t());
-    MOCK_METHOD1(GetPeerHost, int(std::string&));
-    MOCK_METHOD0(GetLocalPort, uint32_t());
-    MOCK_METHOD1(GetLocalHost, int(std::string&));
-    MOCK_METHOD1(SetTimeout, int(std::chrono::seconds));
-    MOCK_METHOD1(GetHostName, int(std::string&));
-    MOCK_METHOD2(GetPort, int(const std::string &, uint16_t &));
-};
-}  // namespace EMDB
+        int BindAndListen() override
+        {
+            return EDB_OK;
+        }
+        int Accept(int &sock, struct sockaddr *addr, socklen_t *addrlen,
+                   std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT) override
+        {
+            return EDB_OK;
+        }
+        int Send(const char *msg, int len, std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT, int flags = 0) override
+        {
+            return EDB_OK;
+        }
+        int Receive(char *msg, int len, std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT, int flags = 0) override
+        {
+            return EDB_OK;
+        }
+        int ReceiveWithoutFlag(char *msg, int len, std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT) override
+        {
+            return EDB_OK;
+        }
+        int Connect() override
+        {
+            return EDB_OK;
+        }
+        [[nodiscard]] bool IsConnected() override
+        {
+            return true;
+        }
+        void Close() override
+        {
+            return;
+        }
+
+        int SetSocketLinger(int onOff, int linger) override
+        {
+            return EDB_OK;
+        }
+        void SetAddress(const std::string &hostName, uint32_t port) override
+        {
+            return;
+        }
+        int DisableNagle() override
+        {
+            return EDB_OK;
+        }
+        uint32_t GetPeerPort() override
+        {
+            return 0;
+        }
+        int GetPeerHost(std::string &host) override
+        {
+            return EDB_OK;
+        }
+        uint32_t GetLocalPort() override
+        {
+            return EDB_OK;
+        }
+        int GetLocalHost(std::string &host) override
+        {
+            return EDB_OK;
+        }
+        int SetTimeout(std::chrono::seconds timeout) override
+        {
+            return EDB_OK;
+        }
+        int GetHostName(std::string &name) override
+        {
+            return EDB_OK;
+        }
+        uint32_t GetPort(const std::string &serviceName) override
+        {
+            return 0;
+        }
+    };
+}  // namespace EMDB::ut
 
 #endif  // EMDB_SOCKET_FAKE_H

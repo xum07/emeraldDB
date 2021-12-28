@@ -11,6 +11,7 @@
 
 namespace EMDB {
 
+constexpr int MSG_BUFF_SIZE = 4096;
 const std::string COMMAND_QUIT = "quit";
 const std::string COMMAND_INSERT = "insert";
 const std::string COMMAND_QUERY = "query";
@@ -21,22 +22,22 @@ const std::string COMMAND_TEST = "test";
 const std::string COMMAND_SNAPSHOT = "snapshot";
 
 class ICmd {
-    using MsgBuildFunc = std::function<int(char** buff, int& buffSize, bson::BSONObj& obj)>;
+    using MsgBuildFunc = std::function<int(char*& buff, int& buffSize, bson::BSONObj& obj)>;
 public:
-    ICmd();
+    ICmd() = default;
     virtual ~ICmd() = default;
-    virtual int Execute(Socket &sock, std::vector<std::string> &args) { return EDB_OK; }
+    virtual int Execute(std::unique_ptr<Socket>& socket, std::vector<std::string> &args) { return EDB_OK; }
 
 protected:
     virtual int HandleReply() { return EDB_OK; }
-    int RcvReply(Socket &sock);
-    int RcvProc(Socket &sock, char* buff, int buffSize);
-    int SendOrder(Socket &sock, MsgBuildFunc &msgBuildFunc);
-    int SendOrder(Socket &sock, int opCode);
+    int RcvReply(std::unique_ptr<Socket>& socket);
+    int RcvProc(std::unique_ptr<Socket>& socket, char* buff, int buffSize);
+    int SendOrder(std::unique_ptr<Socket>& socket, MsgBuildFunc &msgBuildFunc);
+    int SendOrder(std::unique_ptr<Socket>& socket, int opCode);
 
 protected:
-    std::unique_ptr<char []> _recvBuf;
-    std::unique_ptr<char []> _sendBuf;
+    char _recvBuff[MSG_BUFF_SIZE];
+    char _sendBuff[MSG_BUFF_SIZE];
     std::string _json;
 };
 }  // namespace EMDB

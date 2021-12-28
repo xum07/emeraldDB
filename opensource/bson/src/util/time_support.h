@@ -106,14 +106,14 @@ namespace bson {
             xt.nsec -= 1000000000;
             xt.sec++;
         }
-        boost::thread::sleep(xt);
+        boost::this_thread::sleep_for(xt);
     }
 #elif defined(__sunos__)
     inline void sleepsecs(int s) {
         boost::xtime xt;
         boost::xtime_get(&xt, boost::TIME_UTC_);
         xt.sec += s;
-        boost::thread::sleep(xt);
+        boost::this_thread::sleep_for(xt);
     }
     inline void sleepmillis(long long s) {
         boost::xtime xt;
@@ -124,7 +124,7 @@ namespace bson {
             xt.nsec -= 1000000000;
             xt.sec++;
         }
-        boost::thread::sleep(xt);
+        boost::this_thread::sleep_for(xt);
     }
     inline void sleepmicros(long long s) {
         if ( s <= 0 )
@@ -137,7 +137,7 @@ namespace bson {
             xt.nsec -= 1000000000;
             xt.sec++;
         }
-        boost::thread::sleep(xt);
+        boost::this_thread::sleep_for(xt);
     }
 #else
     inline void sleepsecs(int s) {

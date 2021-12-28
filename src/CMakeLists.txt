@@ -1,6 +1,7 @@
 add_compile_options(-Werror)
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
+include(${PROJECT_SOURCE_DIR}/opensource/bson/FindBson.cmake)
 
 add_subdirectory(client)
 add_subdirectory(dms)

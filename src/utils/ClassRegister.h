@@ -1,13 +1,20 @@
 #ifndef EMERALDDB_CLASS_REGISTER_H
 #define EMERALDDB_CLASS_REGISTER_H
 
-#define REGISTER_CLASS(DeriveName, Base, Derive, ...)                                         \
-    namespace {                                                                               \
-    static ClassRegister<Base, Derive, ##__VA_ARGS__> Derive##Reg(DeriveName, ##__VA_ARGS__); \
-    }
+#include <memory>
+#include <unordered_map>
 
-#define GET_REGISTER_CLASS(Base, DeriveName) (ClassContainer<Base>::GetClass<Base>(DeriveName))
-#define GET_REGISTER_CLASS(Base, Derive, DeriveName) (ClassContainer<Base>::GetClass<Derive>(DeriveName))
+#define REGISTER_CLASS(DeriveName, Base, Derive, ...)                                     \
+namespace {                                                                               \
+static EMDB::ClassRegister<Base, Derive, ##__VA_ARGS__> Derive##Reg(DeriveName, ##__VA_ARGS__); \
+}
+
+// Class will be init before use. 
+// Thus in ut test, GET_REGISTER_CLASS will only get nullptr, GET_REGISTER_DERIVE_CLASS must be used instead
+#define GET_REGISTER_CLASS(Base, DeriveName) (EMDB::ClassContainer<Base>::GetClass<Base>(DeriveName))
+#define GET_REGISTER_DERIVE_CLASS(Base, Derive, DeriveName) (EMDB::ClassContainer<Base>::GetClass<Derive>(DeriveName))
+
+namespace EMDB {
 
 template <typename Base>
 class ClassContainer {
@@ -44,5 +51,6 @@ public:
         ClassContainer<Base>::AddClass(name, ptr);
     }
 };
+}  // namespace EMDB
 
 #endif  // EMERALDDB_CLASS_REGISTER_H

@@ -7,7 +7,7 @@ using namespace EMDB;
 
 REGISTER_CLASS(COMMAND_HELP, ICmd, HelpCmd)
 
-int HelpCmd::Execute(Socket &sock, std::vector<std::string> &args)
+int HelpCmd::Execute(std::unique_ptr<Socket>& socket, std::vector<std::string> &args)
 {
     std::cout << "List of classes of commands:\n\n";
     std::cout << COMMAND_CONNECT << " [server] [port]-- connecting emeralddb server\n";

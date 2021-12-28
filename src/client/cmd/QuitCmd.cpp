@@ -1,4 +1,5 @@
 #include "QuitCmd.h"
+#include <iostream>
 #include "utils/ClassRegister.h"
 #include "ErrorCode.h"
 
@@ -6,16 +7,16 @@ using namespace EMDB;
 
 REGISTER_CLASS(COMMAND_QUIT, ICmd, QuitCmd)
 
-int QuitCmd::Execute(Socket &sock, std::vector<std::string> &args)
+int QuitCmd::Execute(std::unique_ptr<Socket>& socket, std::vector<std::string> &args)
 {
-    if (!sock.isConnected()) {
-        return ErrCode2Str(EDB_SOCK_NOT_CONNECT);
+    if (!socket->IsConnected()) {
+        std::cout << ErrCode2Str(EDB_SOCK_NOT_CONNECT) << std::endl;
+        return EDB_SOCK_NOT_CONNECT;
     }
 
-    auto ret = sendOrder(sock, 0);
-    // sock.close();
-    ret = handleReply();
-    return ret;
+    SendOrder(socket, 0);
+    // sock.Close();
+    return HandleReply();
 }
 
 int QuitCmd::HandleReply()

@@ -167,7 +167,7 @@ namespace bson {
 
         bool haveSubobj() const { return _subobj.get() != 0; }
         BSONObjBuilder *subobj();
-        auto_ptr< BSONObjBuilder > _subobj;
+        unique_ptr< BSONObjBuilder > _subobj;
     };
 
     /**

@@ -14,50 +14,54 @@ namespace EMDB {
 
 class Socket {
 public:
-    Socket() : _localAddr(), _localAddrLen(sizeof(_localAddr)), _peerAddr(), _peerAddrLen(sizeof(_peerAddr)) {};
+    Socket() = default;
     // create a listening socket
     explicit Socket(uint32_t port, std::chrono::microseconds timeout = ZERO_TIMEOUT);
     // create a connecting socket
-    Socket(const std::string &hostName, uint32_t port, std::chrono::microseconds timeout = ZERO_TIMEOUT);
+    Socket(const std::string& hostName, uint32_t port, std::chrono::microseconds timeout = ZERO_TIMEOUT);
     // create from an existing socket
     explicit Socket(int fd, std::chrono::microseconds timeout = ZERO_TIMEOUT);
-    ~Socket() { Close(); }
 
-    int InitSocket();
-    int BindAndListen();
-    int Accept(int &sock, struct sockaddr *addr, socklen_t *addrlen,
-               std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT);
-    int Send(const char* msg, int len, std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT, int flags = 0);
-    int Receive(char *msg, int len, std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT, int flags = 0);
-    int ReceiveWithoutFlag(char *msg, int len, std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT);
-    int Connect();
-    [[nodiscard]] bool IsConnected() const;
-    void Close();
+    virtual ~Socket()
+    {
+        Close();
+    }
 
-    int SetSocketLinger(int onOff, int linger) const;
-    void SetAddress(const std::string &hostName, uint32_t port);
-    int DisableNagle();
-    uint32_t GetPeerPort();
-    int GetPeerHost(std::string& host);
-    uint32_t GetLocalPort();
-    int GetLocalHost(std::string& host);
-    int SetTimeout(std::chrono::seconds timeout);
-    static int GetHostName(std::string& name);
-    static void GetPort(const std::string &serviceName, uint16_t &port);
+    virtual int InitSocket();
+    virtual int BindAndListen();
+    virtual int Accept(int& sock, struct sockaddr* addr, socklen_t* addrlen,
+                       std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT);
+    virtual int Send(const char* msg, int len, std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT,
+                     int flags = 0);
+    virtual int Receive(char* msg, int len, std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT, int flags = 0);
+    virtual int ReceiveWithoutFlag(char* msg, int len, std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT);
+    virtual int Connect();
+    [[nodiscard]] virtual bool IsConnected();
+    virtual void Close();
+    virtual int SetSocketLinger(int onOff, int linger);
+    virtual void SetAddress(const std::string& hostName, uint32_t port);
+    virtual int DisableNagle();
+    virtual uint32_t GetPeerPort();
+    virtual int GetPeerHost(std::string& host);
+    virtual uint32_t GetLocalPort();
+    virtual int GetLocalHost(std::string& host);
+    virtual int SetTimeout(std::chrono::seconds timeout);
+    virtual int GetHostName(std::string& name);
+    virtual uint32_t GetPort(const std::string& serviceName);
 
 protected:
-    uint32_t GetPort(sockaddr_in *addr);
-    int TransAddr2Host(sockaddr_in *addr, std::string& host);
+    uint32_t GetPort(sockaddr_in* addr);
+    int TransAddr2Host(sockaddr_in* addr, std::string& host);
 
 private:
-    int IsSocketReady(std::chrono::microseconds &timeout);
+    int IsSocketReady(std::chrono::microseconds& timeout);
 
 private:
     int _fd{0};
-    struct sockaddr_in _localAddr;
-    socklen_t _localAddrLen;
-    struct sockaddr_in _peerAddr;
-    socklen_t _peerAddrLen;
+    struct sockaddr_in _localAddr{};
+    socklen_t _localAddrLen{ sizeof(_localAddr) };
+    struct sockaddr_in _peerAddr{};
+    socklen_t _peerAddrLen{ sizeof(_peerAddr) };
     bool _init{false};
     std::chrono::microseconds _timeout{ZERO_TIMEOUT};
 };

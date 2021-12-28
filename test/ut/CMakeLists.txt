@@ -1,6 +1,6 @@
 add_compile_options(-Werror)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/fake)
+include_directories(${PROJECT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/fake ${bson_INCLUDE_DIRS})
 
 add_subdirectory(client)
 add_subdirectory(dms)

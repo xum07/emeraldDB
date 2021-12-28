@@ -9,7 +9,7 @@ class ConnectCmd : public ICmd {
 public:
     ConnectCmd() = default;
     ~ConnectCmd() override = default;
-    int Execute(Socket &sock, std::vector<std::string> &args) override;
+    int Execute(std::unique_ptr<Socket>& socket, std::vector<std::string> &args) override;
 
 private:
     std::string _address;
@@ -18,4 +18,4 @@ private:
 
 }  // namespace EMDB
 
-#endif EMERALDDB_CONNECT_COMMAND_H
+#endif  // EMERALDDB_CONNECT_COMMAND_H

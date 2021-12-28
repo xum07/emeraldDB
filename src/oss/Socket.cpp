@@ -14,7 +14,6 @@ constexpr int LINGER_TURN_ON = 1;
 constexpr int MAX_RECEIVE_RETRY_TIMES = 5;
 
 Socket::Socket(uint32_t port, std::chrono::microseconds timeout)
-        : _localAddr(), _peerAddr(), _peerAddrLen(sizeof(_peerAddr))
 {
     _timeout = timeout;
     _localAddr.sin_family = AF_INET;
@@ -30,7 +29,6 @@ Socket::Socket(const std::string &hostName, uint32_t port, std::chrono::microsec
 }
 
 Socket::Socket(int fd, std::chrono::microseconds timeout)
-        : _localAddrLen(sizeof(_localAddr)), _peerAddr(), _peerAddrLen(sizeof(_peerAddr))
 {
     _fd = fd;
     _init = true;
@@ -52,8 +50,6 @@ int Socket::InitSocket()
         return EDB_OK;
     }
 
-    _peerAddr = {};
-    _peerAddrLen = sizeof(_peerAddr);
     _fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (_fd == -1) {
         std::cout << "failed to init socket, error=" << errno << std::endl;
@@ -65,7 +61,7 @@ int Socket::InitSocket()
     return EDB_OK;
 }
 
-int Socket::SetSocketLinger(int onOff, int linger) const
+int Socket::SetSocketLinger(int onOff, int linger)
 {
     struct linger lg{
             onOff, linger
@@ -149,7 +145,7 @@ int Socket::Send(const char *msg, int len, std::chrono::microseconds timeout, in
     return EDB_OK;
 }
 
-bool Socket::IsConnected() const
+bool Socket::IsConnected()
 {
     int ret = send(_fd, "", 0, MSG_NOSIGNAL);
     return ret >= 0;
@@ -374,10 +370,11 @@ int Socket::GetHostName(std::string &name)
     return 0;
 }
 
-void Socket::GetPort(const std::string &serviceName, uint16_t &port)
+uint32_t Socket::GetPort(const std::string &serviceName)
 {
     auto servInfo = getservbyname(serviceName.data(), "tcp");
-    port = (servInfo == nullptr) ? atoi(serviceName.data()) : ntohs(servInfo->s_port);
+    auto port = (servInfo == nullptr) ? atoi(serviceName.data()) : ntohs(servInfo->s_port);
+    return port;
 }
 
 int Socket::IsSocketReady(std::chrono::microseconds &timeout)
