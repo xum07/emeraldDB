@@ -20,4 +20,5 @@ target_link_libraries(ut PRIVATE
   pthread
   oss_test
   client_cmd_test
+  client_test
 )

@@ -7,7 +7,7 @@ using namespace EMDB;
 using namespace EMDB::ut;
 using namespace testing;
 
-TEST(QuitCmdTest, execute_ok)
+TEST(CmdTest, execute_quit_ok)
 {
     SocketFake socketFake_;
     auto cmd = GET_REGISTER_DERIVE_CLASS(ICmd, QuitCmd, COMMAND_QUIT);

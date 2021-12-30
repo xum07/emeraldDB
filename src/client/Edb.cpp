@@ -1,6 +1,5 @@
 #include "Edb.h"
 #include <iostream>
-#include <sstream>
 #include <algorithm>
 #include "cmd/CmdInf.h"
 #include "utils/ClassRegister.h"
@@ -8,31 +7,26 @@
 
 using namespace EMDB;
 
-constexpr int CMD_BUFFER_SIZE = 512;
-
-Edb::Edb()
-{
-    _cmdBuff = std::make_unique<char []>(CMD_BUFFER_SIZE);
-}
-
 void Edb::Start()
 {
     std::cout << "Welcome to EmeraldDB Shell!" << std::endl;
     std::cout << "You can type help to get help, Ctrl+C or quit to exit" << std::endl;
     while (!_quit) {
-        std::cout << "emdb>";
-        auto input = ReadInput();
-        auto ret = CmdDispatch(input);
-        if (ret != EDB_OK) {
-            std::cout << "failed to execute cmd, ret=" << ret << std::endl;
-        }
+        (void)InputProc();
     }
 }
 
-std::vector<std::string> Edb::ReadInput()
+int Edb::InputProc(std::istream& stream)
+{
+    std::cout << "emdb>";
+    auto input = ReadInput(stream);
+    return CmdDispatch(input);
+}
+
+std::vector<std::string> Edb::ReadInput(std::istream& stream)
 {
     std::string input;
-    std::getline(std::cin, input);
+    std::getline(stream, input);
 
     // replace tab with space and delete '\'
     stringstream ss;
@@ -61,7 +55,7 @@ std::vector<std::string> Edb::ReadInput()
 
 int Edb::CmdDispatch(std::vector<std::string>& input)
 {
-    if (input.size() < 1) {
+    if (input.empty()) {
         std::cout << ErrCode2Str(EDB_INVALID_PARAM) << std::endl;
         return EDB_INVALID_PARAM;
     }
@@ -73,6 +67,10 @@ int Edb::CmdDispatch(std::vector<std::string>& input)
     }
 
     auto cmdArgs = std::vector<std::string>(input.begin() + 1, input.end());
-    std::cout << "start to execute cmd: " << input[0] << std::endl;
-    return cmd->Execute(_socket, cmdArgs);
+    auto ret = cmd->Execute(_socket, cmdArgs);
+    if (ret != EDB_OK) {
+        std::cout << "failed to execute cmd: " << input[0] << std::endl;
+    }
+
+    return ret;
 }
