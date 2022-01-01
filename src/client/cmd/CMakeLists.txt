@@ -1,4 +1,4 @@
-add_library(client_cmd STATIC
+add_library(client_cmd SHARED
   CmdInf.cpp
   TestCmd.cpp
   HelpCmd.cpp

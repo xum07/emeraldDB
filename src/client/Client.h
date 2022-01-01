@@ -1,5 +1,5 @@
-#ifndef EMERALDDB_EDB_H
-#define EMERALDDB_EDB_H
+#ifndef EMERALDDB_CLIENT_H
+#define EMERALDDB_CLIENT_H
 
 #include <string>
 #include <vector>
@@ -8,12 +8,13 @@
 #include <istream>
 #include <iostream>
 #include "oss/Socket.h"
+#include "utils/Singleton.h"
 
 namespace EMDB {
-class Edb {
+class Client : public Singleton<Client> {
 public:
-    Edb() = default;
-    virtual ~Edb() = default;
+    Client() = default;
+    ~Client() override = default;
     void Start();
     void Quit() { _quit = true; };
     int InputProc(std::istream& stream = std::cin);
@@ -28,4 +29,4 @@ private:
 };
 }  // namespace EMDB
 
-#endif //EMERALDDB_EDB_H
+#endif //EMERALDDB_CLIENT_H

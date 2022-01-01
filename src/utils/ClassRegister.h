@@ -4,14 +4,16 @@
 #include <memory>
 #include <unordered_map>
 
+// Pay Attention: static parameter will not be first initialized when linked as static-library in executable file
 #define REGISTER_CLASS(DeriveName, Base, Derive, ...)                                     \
 namespace {                                                                               \
 static EMDB::ClassRegister<Base, Derive, ##__VA_ARGS__> Derive##Reg(DeriveName, ##__VA_ARGS__); \
 }
 
-// Class will be init before use. 
-// Thus in ut test, GET_REGISTER_CLASS will only get nullptr, GET_REGISTER_DERIVE_CLASS must be used instead
+// Keep the target shared or object if you only want to use GET_REGISTER_CLASS function
 #define GET_REGISTER_CLASS(Base, DeriveName) (EMDB::ClassContainer<Base>::GetClass<Base>(DeriveName))
+
+// GET_REGISTER_DERIVE_CLASS worked ok even in static library target
 #define GET_REGISTER_DERIVE_CLASS(Base, Derive, DeriveName) (EMDB::ClassContainer<Base>::GetClass<Derive>(DeriveName))
 
 namespace EMDB {

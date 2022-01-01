@@ -1215,7 +1215,7 @@ namespace bson {
             append( fieldName , - numeric_limits<double>::max() ); return;
         case jstOID: {
             OID o;
-            memset(&o, 0, sizeof(o));
+            memset(static_cast<void*>(&o), 0, sizeof(o));
             appendOID( fieldName , &o);
             return;
         }
@@ -1235,7 +1235,7 @@ namespace bson {
         case RegEx: appendRegex( fieldName , "" ); return;
         case DBRef: {
             OID o;
-            memset(&o, 0, sizeof(o));
+            memset(static_cast<void*>(&o), 0, sizeof(o));
             appendDBRef( fieldName , "" , o );
             return;
         }
@@ -1262,7 +1262,7 @@ namespace bson {
             break;
         case jstOID: {
             OID o;
-            memset(&o, 0xFF, sizeof(o));
+            memset(static_cast<void*>(&o), 0xFF, sizeof(o));
             appendOID( fieldName , &o);
             break;
         }

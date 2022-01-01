@@ -2,6 +2,7 @@
 #include <iostream>
 #include "utils/ClassRegister.h"
 #include "ErrorCode.h"
+#include "client/Client.h"
 
 using namespace EMDB;
 
@@ -15,12 +16,12 @@ int QuitCmd::Execute(std::unique_ptr<Socket>& socket, std::vector<std::string> &
     }
 
     SendOrder(socket, 0);
-    // sock.Close();
+    socket->Close();
     return HandleReply();
 }
 
 int QuitCmd::HandleReply()
 {
-    // gQuit = 1;
+    Singleton<Client>::Instance().Quit();
     return EDB_OK;
 }
