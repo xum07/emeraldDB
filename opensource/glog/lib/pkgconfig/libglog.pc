@@ -1,0 +1,10 @@
+prefix=/home/emeralddb/emeralddb/opensource/glog/glog/install
+exec_prefix=/home/emeralddb/emeralddb/opensource/glog/glog/install/bin
+libdir=/home/emeralddb/emeralddb/opensource/glog/glog/install/lib
+includedir=/home/emeralddb/emeralddb/opensource/glog/glog/install/include
+
+Name: libglog
+Description: Google Log (glog) C++ logging framework
+Version: 0.6.0
+Libs: -L${libdir} -lglog
+Cflags: -I${includedir}

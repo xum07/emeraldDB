@@ -9,7 +9,8 @@ The implements of this project have some differences from the lecture, such as:
 
 1. use cmake as project organize tool
 2. base on TDD(Test drive development), thus lots of tests added
-3. some improvement of the ways to using CPP
+3. some adjustments will be added, such as the design of class, log module and so on
+4. some improvement of the ways to using CPP
 
 # project structure
 
