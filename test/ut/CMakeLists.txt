@@ -18,9 +18,11 @@ target_link_libraries(ut PRIVATE
   GTest::gmock
   GTest::gmock_main
   pthread
+  oss
   oss_test
   client_cmd
   client_cmd_test
   client
   client_test
+  pd
 )

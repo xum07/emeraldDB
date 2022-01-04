@@ -1,5 +1,6 @@
 #include "CmdInf.h"
 #include "ErrorCode.h"
+#include "pd/Log.h"
 
 using namespace EMDB;
 
@@ -11,7 +12,7 @@ int ICmd::RcvReply(std::unique_ptr<Socket>& socket)
 {
     memset(_recvBuff, 0, MSG_BUFF_SIZE);
     if (!socket->IsConnected()) {
-        std::cout << ErrCode2Str(EDB_SOCK_NOT_CONNECT) << std::endl;
+        EMDB_LOG(E) << ErrCode2Str(EDB_SOCK_NOT_CONNECT);
         return EDB_SOCK_NOT_CONNECT;
     }
 
@@ -19,7 +20,7 @@ int ICmd::RcvReply(std::unique_ptr<Socket>& socket)
     auto ret = RcvProc(socket, _recvBuff, MSG_LENGTH_OCCUPY);
     auto length = *(int *)_recvBuff;
     if (length > MSG_BUFF_SIZE) {
-        std::cout << ErrCode2Str(EDB_RECV_DATA_LENGTH_ERROR) << std::endl;
+        EMDB_LOG(E) << ErrCode2Str(EDB_RECV_DATA_LENGTH_ERROR);
         return EDB_RECV_DATA_LENGTH_ERROR;
     }
 
@@ -36,7 +37,7 @@ int ICmd::RcvProc(std::unique_ptr<Socket>& socket, char *buff, int buffSize)
         if (ret == EDB_TIMEOUT) {
             continue;
         } else if (ret == EDB_NETWORK_CLOSE) {
-            std::cout << ErrCode2Str(EDB_SOCK_REMOTE_CLOSED) << std::endl;
+            EMDB_LOG(E) << ErrCode2Str(EDB_SOCK_REMOTE_CLOSED);
             return EDB_SOCK_REMOTE_CLOSED;
         } else {
             break;
@@ -52,7 +53,7 @@ int ICmd::SendOrder(std::unique_ptr<Socket>& socket, MsgBuildFunc &msgBuildFunc)
     try {
         bsonData = bson::fromjson(_json);
     } catch (std::exception &e) {
-        std::cout << ErrCode2Str(EDB_INVALID_RECORD) << std::endl;
+        EMDB_LOG(E) << ErrCode2Str(EDB_INVALID_RECORD);
         return EDB_INVALID_RECORD;
     }
 
@@ -62,14 +63,14 @@ int ICmd::SendOrder(std::unique_ptr<Socket>& socket, MsgBuildFunc &msgBuildFunc)
     char *sendBuf = _sendBuff;
     auto ret = msgBuildFunc(sendBuf, size, bsonData);
     if (ret != EDB_OK) {
-        std::cout << ErrCode2Str(EDB_MSG_BUILD_FAILED) << std::endl;
+        EMDB_LOG(E) << ErrCode2Str(EDB_MSG_BUILD_FAILED);
         return EDB_MSG_BUILD_FAILED;
     }
 
     // second send the follow-up data
     ret = socket->Send(sendBuf, *(int *)sendBuf);
     if (ret != EDB_OK) {
-        std::cout << ErrCode2Str(EDB_SOCK_SEND_FAILD) << std::endl;
+        EMDB_LOG(E) << ErrCode2Str(EDB_SOCK_SEND_FAILD);
         return EDB_SOCK_SEND_FAILD;
     }
     return ret;

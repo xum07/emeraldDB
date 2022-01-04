@@ -1,6 +1,7 @@
 #include "ConnectCmd.h"
 #include "utils/ClassRegister.h"
 #include "ErrorCode.h"
+#include "pd/Log.h"
 
 using namespace EMDB;
 
@@ -9,7 +10,7 @@ REGISTER_CLASS(COMMAND_CONNECT, ICmd, ConnectCmd)
 int ConnectCmd::Execute(std::unique_ptr<Socket>& socket, std::vector<std::string> &args)
 {
     if (args.size() < 2) {
-        std::cout << "Invalid param for ConnectCmd" << std::endl;
+        EMDB_LOG(E) << "Invalid param for ConnectCmd";
         return EDB_INVALID_PARAM;
     }
 
@@ -21,13 +22,13 @@ int ConnectCmd::Execute(std::unique_ptr<Socket>& socket, std::vector<std::string
     socket->SetAddress(_address, _port);
     auto ret = socket->InitSocket();
     if (ret != EDB_OK) {
-        std::cout << "Failed to init socket, ret = " << ret << std::endl;
+        EMDB_LOG(E) << "Failed to init socket, ret=" << ret;
         return ret;
     }
 
     ret = socket->Connect();
     if (ret != EDB_OK) {
-        std::cout << "Failed to connect, ret = " << ret << std::endl;
+        EMDB_LOG(E) << "Failed to connect, ret=" << ret;
         return ret;
     }
     socket->DisableNagle();

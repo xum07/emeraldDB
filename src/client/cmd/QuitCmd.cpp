@@ -3,6 +3,7 @@
 #include "utils/ClassRegister.h"
 #include "ErrorCode.h"
 #include "client/Client.h"
+#include "pd/Log.h"
 
 using namespace EMDB;
 
@@ -11,7 +12,7 @@ REGISTER_CLASS(COMMAND_QUIT, ICmd, QuitCmd)
 int QuitCmd::Execute(std::unique_ptr<Socket>& socket, std::vector<std::string> &args)
 {
     if (!socket->IsConnected()) {
-        std::cout << ErrCode2Str(EDB_SOCK_NOT_CONNECT) << std::endl;
+        EMDB_LOG(E) << ErrCode2Str(EDB_SOCK_NOT_CONNECT);
         return EDB_SOCK_NOT_CONNECT;
     }
 
