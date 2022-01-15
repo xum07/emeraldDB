@@ -9,7 +9,7 @@ class QuitCmd : public ICmd {
 public:
     QuitCmd() = default;
     ~QuitCmd() override = default;
-    int Execute(std::unique_ptr<Socket>& socket, std::vector<std::string> &args) override;
+    int Execute(std::unique_ptr<Socket>& socket, std::vector<std::string>& args) override;
 
 protected:
     int HandleReply() override;

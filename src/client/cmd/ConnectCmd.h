@@ -9,7 +9,7 @@ class ConnectCmd : public ICmd {
 public:
     ConnectCmd() = default;
     ~ConnectCmd() override = default;
-    int Execute(std::unique_ptr<Socket>& socket, std::vector<std::string> &args) override;
+    int Execute(std::unique_ptr<Socket>& socket, std::vector<std::string>& args) override;
 
 private:
     std::string _address;

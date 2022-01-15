@@ -18,7 +18,7 @@ int ICmd::RcvReply(std::unique_ptr<Socket>& socket)
 
     // first receive the length of the data
     auto ret = RcvProc(socket, _recvBuff, MSG_LENGTH_OCCUPY);
-    auto length = *(int *)_recvBuff;
+    auto length = *(int*)_recvBuff;
     if (length > MSG_BUFF_SIZE) {
         EMDB_LOG(E) << ErrCode2Str(EDB_RECV_DATA_LENGTH_ERROR);
         return EDB_RECV_DATA_LENGTH_ERROR;
@@ -29,7 +29,7 @@ int ICmd::RcvReply(std::unique_ptr<Socket>& socket)
     return ret;
 }
 
-int ICmd::RcvProc(std::unique_ptr<Socket>& socket, char *buff, int buffSize)
+int ICmd::RcvProc(std::unique_ptr<Socket>& socket, char* buff, int buffSize)
 {
     int ret;
     while (true) {
@@ -47,12 +47,12 @@ int ICmd::RcvProc(std::unique_ptr<Socket>& socket, char *buff, int buffSize)
     return ret;
 }
 
-int ICmd::SendOrder(std::unique_ptr<Socket>& socket, MsgBuildFunc &msgBuildFunc)
+int ICmd::SendOrder(std::unique_ptr<Socket>& socket, MsgBuildFunc& msgBuildFunc)
 {
     bson::BSONObj bsonData;
     try {
         bsonData = bson::fromjson(_json);
-    } catch (std::exception &e) {
+    } catch (std::exception& e) {
         EMDB_LOG(E) << ErrCode2Str(EDB_INVALID_RECORD);
         return EDB_INVALID_RECORD;
     }
@@ -60,7 +60,7 @@ int ICmd::SendOrder(std::unique_ptr<Socket>& socket, MsgBuildFunc &msgBuildFunc)
     // first build msg
     memset(_sendBuff, 0, MSG_BUFF_SIZE);
     int size = MSG_BUFF_SIZE;
-    char *sendBuf = _sendBuff;
+    char* sendBuf = _sendBuff;
     auto ret = msgBuildFunc(sendBuf, size, bsonData);
     if (ret != EDB_OK) {
         EMDB_LOG(E) << ErrCode2Str(EDB_MSG_BUILD_FAILED);
@@ -68,7 +68,7 @@ int ICmd::SendOrder(std::unique_ptr<Socket>& socket, MsgBuildFunc &msgBuildFunc)
     }
 
     // second send the follow-up data
-    ret = socket->Send(sendBuf, *(int *)sendBuf);
+    ret = socket->Send(sendBuf, *(int*)sendBuf);
     if (ret != EDB_OK) {
         EMDB_LOG(E) << ErrCode2Str(EDB_SOCK_SEND_FAILD);
         return EDB_SOCK_SEND_FAILD;
@@ -80,13 +80,13 @@ int ICmd::SendOrder(std::unique_ptr<Socket>& socket, int opCode)
 {
     int ret = EDB_OK;
     memset(_sendBuff, 0, MSG_BUFF_SIZE);
-    char *sendBuf = _sendBuff;
+    char* sendBuf = _sendBuff;
     auto str = "hello world";
-    *(int *)sendBuf = strlen(str) + 1 + MSG_LENGTH_OCCUPY;
+    *(int*)sendBuf = strlen(str) + 1 + MSG_LENGTH_OCCUPY;
     strcpy(&sendBuf[MSG_LENGTH_OCCUPY], str);
     /* MsgHeader *header = (MsgHeader*)pSendBuf;
     header->messageLen = sizeof(MsgHeader);
     header->opCode = opCode; */
-    ret = socket->Send(sendBuf, *(int *)sendBuf);
+    ret = socket->Send(sendBuf, *(int*)sendBuf);
     return ret;
 }

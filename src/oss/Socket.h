@@ -1,11 +1,11 @@
 #ifndef EMERALDDB_SOCKET_H
 #define EMERALDDB_SOCKET_H
 
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
-#include <string>
+#include <netinet/in.h>
+#include <sys/socket.h>
 #include <chrono>
+#include <string>
 
 namespace EMDB {
 
@@ -18,23 +18,23 @@ public:
     // create a listening socket
     explicit Socket(uint32_t port, std::chrono::microseconds timeout = ZERO_TIMEOUT);
     // create a connecting socket
-    Socket(const std::string& hostName, uint32_t port, std::chrono::microseconds timeout = ZERO_TIMEOUT);
+    Socket(const std::string& hostName, uint32_t port,
+           std::chrono::microseconds timeout = ZERO_TIMEOUT);
     // create from an existing socket
     explicit Socket(int fd, std::chrono::microseconds timeout = ZERO_TIMEOUT);
 
-    virtual ~Socket()
-    {
-        Close();
-    }
+    virtual ~Socket() { Close(); }
 
     virtual int InitSocket();
     virtual int BindAndListen();
     virtual int Accept(int& sock, struct sockaddr* addr, socklen_t* addrlen,
                        std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT);
-    virtual int Send(const char* msg, int len, std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT,
-                     int flags = 0);
-    virtual int Receive(char* msg, int len, std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT, int flags = 0);
-    virtual int ReceiveWithoutFlag(char* msg, int len, std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT);
+    virtual int Send(const char* msg, int len,
+                     std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT, int flags = 0);
+    virtual int Receive(char* msg, int len,
+                        std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT, int flags = 0);
+    virtual int ReceiveWithoutFlag(char* msg, int len,
+                                   std::chrono::microseconds timeout = SOCKET_DEFAULT_TIMEOUT);
     virtual int Connect();
     [[nodiscard]] virtual bool IsConnected();
     virtual void Close();
@@ -58,10 +58,10 @@ private:
 
 private:
     int _fd{0};
-    struct sockaddr_in _localAddr{};
-    socklen_t _localAddrLen{ sizeof(_localAddr) };
-    struct sockaddr_in _peerAddr{};
-    socklen_t _peerAddrLen{ sizeof(_peerAddr) };
+    struct sockaddr_in _localAddr {};
+    socklen_t _localAddrLen{sizeof(_localAddr)};
+    struct sockaddr_in _peerAddr {};
+    socklen_t _peerAddrLen{sizeof(_peerAddr)};
     bool _init{false};
     std::chrono::microseconds _timeout{ZERO_TIMEOUT};
 };

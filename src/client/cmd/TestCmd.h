@@ -9,11 +9,8 @@ class TestCmd : public ICmd {
 public:
     TestCmd() = default;
     ~TestCmd() override = default;
-    int Execute(std::unique_ptr<Socket>& socket, std::vector<std::string> &args) override;
-    std::vector<std::string> GetCmdArgs() const
-    {
-        return _args;
-    }
+    int Execute(std::unique_ptr<Socket>& socket, std::vector<std::string>& args) override;
+    std::vector<std::string> GetCmdArgs() const { return _args; }
 
 private:
     std::vector<std::string> _args;

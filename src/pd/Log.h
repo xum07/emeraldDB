@@ -8,7 +8,8 @@
 #define EMDB_LOG_E LOG(ERROR)
 #define EMDB_LOG_F LOG(FATAL)
 #define EMDB_LOG(severity) EMDB_LOG_##severity
-#define EMDB_LOG_IF(severity, condition) !(condition) ? (void)(0) : google::LogMessageVoidify() & EMDB_LOG_##severity
+#define EMDB_LOG_IF(severity, condition) \
+    !(condition) ? (void)(0) : google::LogMessageVoidify() & EMDB_LOG_##severity
 
 namespace EMDB {
 enum LogSeverity : int {
@@ -22,9 +23,9 @@ const char* const LOG_DIR = "./log/";
 
 class Log {
 public:
-    static bool Init(const char *programName, const char* logDir = LOG_DIR);
+    static bool Init(const char* programName, const char* logDir = LOG_DIR);
     static void Destory();
-    static void Writer(const char *data, size_t size);
+    static void Writer(const char* data, size_t size);
 };
 
 }  // namespace EMDB

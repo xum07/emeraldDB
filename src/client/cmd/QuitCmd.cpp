@@ -1,15 +1,14 @@
 #include "QuitCmd.h"
-#include <iostream>
-#include "utils/ClassRegister.h"
-#include "ErrorCode.h"
 #include "client/Client.h"
+#include "ErrorCode.h"
 #include "pd/Log.h"
+#include "utils/ClassRegister.h"
 
 using namespace EMDB;
 
 REGISTER_CLASS(COMMAND_QUIT, ICmd, QuitCmd)
 
-int QuitCmd::Execute(std::unique_ptr<Socket>& socket, std::vector<std::string> &args)
+int QuitCmd::Execute(std::unique_ptr<Socket>& socket, std::vector<std::string>& args)
 {
     if (!socket->IsConnected()) {
         EMDB_LOG(E) << ErrCode2Str(EDB_SOCK_NOT_CONNECT);

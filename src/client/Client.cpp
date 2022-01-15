@@ -1,10 +1,10 @@
 #include "Client.h"
-#include <iostream>
 #include <algorithm>
+#include <iostream>
 #include "cmd/CmdInf.h"
-#include "utils/ClassRegister.h"
 #include "ErrorCode.h"
 #include "pd/Log.h"
+#include "utils/ClassRegister.h"
 
 using namespace EMDB;
 
@@ -32,7 +32,7 @@ std::vector<std::string> Client::ReadInput(std::istream& stream)
     // replace tab with space and delete '\\'(used as a line break mark)
     stringstream ss;
     for (auto& ele : input) {
-        switch(ele) {
+        switch (ele) {
             case '\\':
                 break;
             case '\t':

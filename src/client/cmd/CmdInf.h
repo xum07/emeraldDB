@@ -1,11 +1,11 @@
 #ifndef EMERALDDB_COMMAND_INTERFACE_H
 #define EMERALDDB_COMMAND_INTERFACE_H
 
+#include <bson/src/util/json.h>
+#include <functional>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
-#include <functional>
-#include <bson/src/util/json.h>
 #include "ErrorCode.h"
 #include "oss/Socket.h"
 
@@ -23,16 +23,20 @@ const std::string COMMAND_SNAPSHOT = "snapshot";
 
 class ICmd {
     using MsgBuildFunc = std::function<int(char*& buff, int& buffSize, bson::BSONObj& obj)>;
+
 public:
     ICmd() = default;
     virtual ~ICmd() = default;
-    virtual int Execute(std::unique_ptr<Socket>& socket, std::vector<std::string> &args) { return EDB_OK; }
+    virtual int Execute(std::unique_ptr<Socket>& socket, std::vector<std::string>& args)
+    {
+        return EDB_OK;
+    }
 
 protected:
     virtual int HandleReply() { return EDB_OK; }
     int RcvReply(std::unique_ptr<Socket>& socket);
     int RcvProc(std::unique_ptr<Socket>& socket, char* buff, int buffSize);
-    int SendOrder(std::unique_ptr<Socket>& socket, MsgBuildFunc &msgBuildFunc);
+    int SendOrder(std::unique_ptr<Socket>& socket, MsgBuildFunc& msgBuildFunc);
     int SendOrder(std::unique_ptr<Socket>& socket, int opCode);
 
 protected:

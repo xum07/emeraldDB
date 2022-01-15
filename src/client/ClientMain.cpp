@@ -1,6 +1,6 @@
+#include <iostream>
 #include "Client.h"
 #include "pd/Log.h"
-#include <iostream>
 
 using namespace EMDB;
 

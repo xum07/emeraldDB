@@ -1,8 +1,8 @@
 #include "Socket.h"
-#include <memory>
 #include <netdb.h>
 #include <netinet/tcp.h>
 #include <unistd.h>
+#include <memory>
 #include "ErrorCode.h"
 #include "pd/Log.h"
 
@@ -22,7 +22,7 @@ Socket::Socket(uint32_t port, std::chrono::microseconds timeout)
     _localAddrLen = sizeof(_localAddr);
 }
 
-Socket::Socket(const std::string &hostName, uint32_t port, std::chrono::microseconds timeout)
+Socket::Socket(const std::string& hostName, uint32_t port, std::chrono::microseconds timeout)
 {
     _timeout = timeout;
     SetAddress(hostName, port);
@@ -34,11 +34,11 @@ Socket::Socket(int fd, std::chrono::microseconds timeout)
     _init = true;
     _timeout = timeout;
     errno = 0;
-    auto ret = getsockname(_fd, reinterpret_cast<sockaddr *>(&_localAddr), &_localAddrLen);
+    auto ret = getsockname(_fd, reinterpret_cast<sockaddr*>(&_localAddr), &_localAddrLen);
     if (ret != 0) {
         EMDB_LOG(E) << "failed to sock name, error=" << errno;
     } else {
-        ret = getpeername(_fd, reinterpret_cast<sockaddr *>(&_peerAddr), &_peerAddrLen);
+        ret = getpeername(_fd, reinterpret_cast<sockaddr*>(&_peerAddr), &_peerAddrLen);
         if (ret != 0) {
             EMDB_LOG(E) << "failed to get peer name, error=" << errno;
         }
@@ -65,21 +65,22 @@ int Socket::InitSocket()
 
 int Socket::SetSocketLinger(int onOff, int linger)
 {
-    struct linger lg{
-            onOff, linger
+    struct linger lg {
+        onOff, linger
     };
     auto ret = setsockopt(_fd, SOL_SOCKET, SO_LINGER, &lg, sizeof(lg));
     return ret;
 }
 
-void Socket::SetAddress(const std::string &hostName, uint32_t port)
+void Socket::SetAddress(const std::string& hostName, uint32_t port)
 {
     _localAddr = {};
     _peerAddr = {};
     _peerAddrLen = sizeof(_peerAddr);
     auto ht = gethostbyname(hostName.data());
-    _localAddr.sin_addr.s_addr = (ht != nullptr) ? *(reinterpret_cast<uint32_t *>(ht->h_addr_list[0]))
-                                                 : inet_addr(hostName.data());
+    _localAddr.sin_addr.s_addr = (ht != nullptr)
+                                     ? *(reinterpret_cast<uint32_t*>(ht->h_addr_list[0]))
+                                     : inet_addr(hostName.data());
     _localAddr.sin_family = AF_INET;
     _localAddr.sin_port = htons(port);
     _localAddrLen = sizeof(_localAddr);
@@ -102,7 +103,7 @@ int Socket::BindAndListen()
         EMDB_LOG(E) << "failed to setsockopt SO_LINGER, ret=" << ret << ", errno=" << errno;
     }
 
-    ret = bind(_fd, reinterpret_cast<sockaddr *>(&_localAddr), _localAddrLen);
+    ret = bind(_fd, reinterpret_cast<sockaddr*>(&_localAddr), _localAddrLen);
     if (ret != 0) {
         EMDB_LOG(E) << "failed to bind socket, ret=" << ret << ", errno=" << errno;
         return EDB_NETWORK;
@@ -117,7 +118,7 @@ int Socket::BindAndListen()
     return EDB_OK;
 }
 
-int Socket::Send(const char *msg, int len, std::chrono::microseconds timeout, int flags)
+int Socket::Send(const char* msg, int len, std::chrono::microseconds timeout, int flags)
 {
     // if we don't expect to receive anything, no need to continue
     if (len == 0) {
@@ -152,7 +153,7 @@ bool Socket::IsConnected()
     return ret >= 0;
 }
 
-int Socket::Receive(char *msg, int len, std::chrono::microseconds timeout, int flags)
+int Socket::Receive(char* msg, int len, std::chrono::microseconds timeout, int flags)
 {
     // if we don't expect to receive anything, no need to continue
     if (len == 0) {
@@ -200,7 +201,7 @@ int Socket::Receive(char *msg, int len, std::chrono::microseconds timeout, int f
     return EDB_OK;
 }
 
-int Socket::ReceiveWithoutFlag(char *msg, int len, std::chrono::microseconds timeout)
+int Socket::ReceiveWithoutFlag(char* msg, int len, std::chrono::microseconds timeout)
 {
     // if we don't expect to receive anything, no need to continue
     if (len == 0) {
@@ -238,19 +239,19 @@ int Socket::ReceiveWithoutFlag(char *msg, int len, std::chrono::microseconds tim
 int Socket::Connect()
 {
     errno = 0;
-    int ret = connect(_fd, reinterpret_cast<sockaddr *>(&_localAddr), _localAddrLen);
+    int ret = connect(_fd, reinterpret_cast<sockaddr*>(&_localAddr), _localAddrLen);
     if (ret != 0) {
         EMDB_LOG(E) << "failed to connect, ret=" << ret << ", errno=" << errno;
         return EDB_NETWORK;
     }
 
-    ret = getsockname(_fd, reinterpret_cast<sockaddr *>(&_localAddr), &_localAddrLen);
+    ret = getsockname(_fd, reinterpret_cast<sockaddr*>(&_localAddr), &_localAddrLen);
     if (ret != 0) {
         EMDB_LOG(E) << "failed to get local address, ret=" << ret;
         return EDB_NETWORK;
     }
 
-    ret = getpeername(_fd, reinterpret_cast<sockaddr *>(&_peerAddr), &_peerAddrLen);
+    ret = getpeername(_fd, reinterpret_cast<sockaddr*>(&_peerAddr), &_peerAddrLen);
     if (ret != 0) {
         EMDB_LOG(E) << "failed to get peer address, ret=" << ret;
         return EDB_NETWORK;
@@ -262,12 +263,13 @@ int Socket::Connect()
 void Socket::Close()
 {
     if (_init) {
-        (void) close(_fd);
+        (void)close(_fd);
         _init = false;
     }
 }
 
-int Socket::Accept(int &sock, struct sockaddr *addr, socklen_t *addrlen, std::chrono::microseconds timeout)
+int Socket::Accept(int& sock, struct sockaddr* addr, socklen_t* addrlen,
+                   std::chrono::microseconds timeout)
 {
     auto ret = IsSocketReady(timeout);
     if (ret != EDB_OK) {
@@ -302,12 +304,9 @@ int Socket::DisableNagle()
     return EDB_OK;
 }
 
-uint32_t Socket::GetPort(sockaddr_in *addr)
-{
-    return ntohs(addr->sin_port);
-}
+uint32_t Socket::GetPort(sockaddr_in* addr) { return ntohs(addr->sin_port); }
 
-int Socket::TransAddr2Host(sockaddr_in *addr, std::string &host)
+int Socket::TransAddr2Host(sockaddr_in* addr, std::string& host)
 {
     auto tmpHost = std::make_unique<char[]>(NI_MAXHOST);
     if (!tmpHost) {
@@ -316,8 +315,8 @@ int Socket::TransAddr2Host(sockaddr_in *addr, std::string &host)
     }
 
     errno = 0;
-    auto ret = getnameinfo(reinterpret_cast<sockaddr *>(addr), sizeof(sockaddr), tmpHost.get(), NI_MAXHOST,
-                           nullptr, 0, NI_NUMERICHOST);
+    auto ret = getnameinfo(reinterpret_cast<sockaddr*>(addr), sizeof(sockaddr), tmpHost.get(),
+                           NI_MAXHOST, nullptr, 0, NI_NUMERICHOST);
     if (ret != 0) {
         EMDB_LOG(E) << "failed to getnameinfo, ret=" << ret << ", errno=" << errno;
         return EDB_NETWORK;
@@ -327,30 +326,18 @@ int Socket::TransAddr2Host(sockaddr_in *addr, std::string &host)
     return EDB_OK;
 }
 
-uint32_t Socket::GetLocalPort()
-{
-    return GetPort(&_localAddr);
-}
+uint32_t Socket::GetLocalPort() { return GetPort(&_localAddr); }
 
-uint32_t Socket::GetPeerPort()
-{
-    return GetPort(&_peerAddr);
-}
+uint32_t Socket::GetPeerPort() { return GetPort(&_peerAddr); }
 
-int Socket::GetLocalHost(std::string &host)
-{
-    return TransAddr2Host(&_localAddr, host);
-}
+int Socket::GetLocalHost(std::string& host) { return TransAddr2Host(&_localAddr, host); }
 
-int Socket::GetPeerHost(std::string &host)
-{
-    return TransAddr2Host(&_peerAddr, host);
-}
+int Socket::GetPeerHost(std::string& host) { return TransAddr2Host(&_peerAddr, host); }
 
 int Socket::SetTimeout(std::chrono::seconds timeout)
 {
-    struct timeval tv{
-            timeout.count(), 0
+    struct timeval tv {
+        timeout.count(), 0
     };
 
     errno = 0;
@@ -366,7 +353,7 @@ int Socket::SetTimeout(std::chrono::seconds timeout)
     return EDB_OK;
 }
 
-int Socket::GetHostName(std::string &name)
+int Socket::GetHostName(std::string& name)
 {
     char tmpName[HOST_NAME_MAX] = {0};
     auto ret = gethostname(tmpName, sizeof(tmpName));
@@ -379,17 +366,17 @@ int Socket::GetHostName(std::string &name)
     return 0;
 }
 
-uint32_t Socket::GetPort(const std::string &serviceName)
+uint32_t Socket::GetPort(const std::string& serviceName)
 {
     auto servInfo = getservbyname(serviceName.data(), "tcp");
     auto port = (servInfo == nullptr) ? atoi(serviceName.data()) : ntohs(servInfo->s_port);
     return port;
 }
 
-int Socket::IsSocketReady(std::chrono::microseconds &timeout)
+int Socket::IsSocketReady(std::chrono::microseconds& timeout)
 {
     constexpr int SECOND_TO_MICROSECOND = 1000000;
-    struct timeval maxSelectTime{};
+    struct timeval maxSelectTime {};
     maxSelectTime.tv_sec = duration_cast<seconds>(timeout).count() / SECOND_TO_MICROSECOND;
     maxSelectTime.tv_usec = timeout.count() % SECOND_TO_MICROSECOND;
 
@@ -400,7 +387,8 @@ int Socket::IsSocketReady(std::chrono::microseconds &timeout)
         FD_ZERO(&fds);
         FD_SET(_fd, &fds);
         errno = 0;
-        auto ret = select(maxFd + 1, &fds, nullptr, nullptr, timeout.count() > 0 ? &maxSelectTime : nullptr);
+        auto ret = select(maxFd + 1, &fds, nullptr, nullptr,
+                          timeout.count() > 0 ? &maxSelectTime : nullptr);
         // 0 means timeout
         if (ret == 0) {
             return EDB_TIMEOUT;

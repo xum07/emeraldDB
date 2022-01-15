@@ -1,13 +1,13 @@
 #include "ConnectCmd.h"
-#include "utils/ClassRegister.h"
 #include "ErrorCode.h"
 #include "pd/Log.h"
+#include "utils/ClassRegister.h"
 
 using namespace EMDB;
 
 REGISTER_CLASS(COMMAND_CONNECT, ICmd, ConnectCmd)
 
-int ConnectCmd::Execute(std::unique_ptr<Socket>& socket, std::vector<std::string> &args)
+int ConnectCmd::Execute(std::unique_ptr<Socket>& socket, std::vector<std::string>& args)
 {
     if (args.size() < 2) {
         EMDB_LOG(E) << "Invalid param for ConnectCmd";

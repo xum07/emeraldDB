@@ -1,9 +1,9 @@
 #include "client/Client.h"
 #include <gtest/gtest.h>
-#include "utils/ClassRegister.h"
-#include "ErrorCode.h"
 #include "client/cmd/CmdInf.h"
 #include "client/cmd/TestCmd.h"
+#include "ErrorCode.h"
+#include "utils/ClassRegister.h"
 
 using namespace EMDB;
 using namespace testing;

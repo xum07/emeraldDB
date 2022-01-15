@@ -1,12 +1,12 @@
 #ifndef EMERALDDB_CLIENT_H
 #define EMERALDDB_CLIENT_H
 
+#include <atomic>
+#include <iostream>
+#include <istream>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
-#include <atomic>
-#include <istream>
-#include <iostream>
 #include "oss/Socket.h"
 #include "utils/Singleton.h"
 
@@ -29,4 +29,4 @@ private:
 };
 }  // namespace EMDB
 
-#endif //EMERALDDB_CLIENT_H
+#endif  //EMERALDDB_CLIENT_H

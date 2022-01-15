@@ -9,7 +9,7 @@ class HelpCmd : public ICmd {
 public:
     HelpCmd() = default;
     ~HelpCmd() override = default;
-    int Execute(std::unique_ptr<Socket>& socket, std::vector<std::string> &args) override;
+    int Execute(std::unique_ptr<Socket>& socket, std::vector<std::string>& args) override;
 };
 
 }  // namespace EMDB
