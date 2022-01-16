@@ -24,7 +24,7 @@ private:
     int CmdDispatch(std::vector<std::string>& input);
 
 private:
-    std::unique_ptr<Socket> _socket{nullptr};
+    std::unique_ptr<Socket> _socket{std::make_unique<Socket>()};
     bool _quit{false};
 };
 }  // namespace EMDB

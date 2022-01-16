@@ -14,12 +14,17 @@ int ConnectCmd::Execute(std::unique_ptr<Socket>& socket, std::vector<std::string
         return EDB_INVALID_PARAM;
     }
 
+    if (socket) {
+        EMDB_LOG(W) << "close current socket and reopen it";
+        socket->Close();
+    }
+
     // socket is not the aim of this project, thus args check will be ignored
     // not only here, but also lots of codes will design based on the thought
     _address = args[0];
     _port = std::stoul(args[1]);
-    socket->Close();
     socket->SetAddress(_address, _port);
+    EMDB_LOG(I) << "connect address(" << _address << "):port(" << _port << ")";
     auto ret = socket->InitSocket();
     if (ret != EDB_OK) {
         EMDB_LOG(E) << "Failed to init socket, ret=" << ret;

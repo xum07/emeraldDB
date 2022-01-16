@@ -11,7 +11,7 @@ using namespace testing;
 TEST(CmdTest, InputProc_ok)
 {
     std::istringstream in("test 1\\23 23\1az zs\t1az");
-    ASSERT_EQ(Singleton<Client>::Instance().InputProc(in), EDB_OK);
+    EXPECT_EQ(Singleton<Client>::Instance().InputProc(in), EDB_OK);
 
     auto testCmd = GET_REGISTER_DERIVE_CLASS(ICmd, TestCmd, "test");
     auto args = testCmd->GetCmdArgs();

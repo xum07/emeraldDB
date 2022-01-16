@@ -56,8 +56,8 @@ std::vector<std::string> Client::ReadInput(std::istream& stream)
 
 int Client::CmdDispatch(std::vector<std::string>& input)
 {
+    // DO NOT log here to allow user enter a new line
     if (input.empty()) {
-        EMDB_LOG(E) << ErrCode2Str(EDB_INVALID_PARAM);
         return EDB_INVALID_PARAM;
     }
 
@@ -69,10 +69,7 @@ int Client::CmdDispatch(std::vector<std::string>& input)
 
     auto cmdArgs = std::vector<std::string>(input.begin() + 1, input.end());
     auto ret = cmd->Execute(_socket, cmdArgs);
-    if (ret != EDB_OK) {
-        EMDB_LOG(E) << "failed to execute cmd: " << input[0];
-    }
-
-    EMDB_LOG(I) << "start to execute cmd: " << input[0];
+    EMDB_LOG(I) << "execute cmd[" << input[0] << "]"
+                << ", ret=" << ret;
     return ret;
 }

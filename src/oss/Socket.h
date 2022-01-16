@@ -54,7 +54,7 @@ protected:
     int TransAddr2Host(sockaddr_in* addr, std::string& host);
 
 private:
-    int IsSocketReady(std::chrono::microseconds& timeout);
+    int IsSocketReady(std::chrono::microseconds& timeout, bool readFromSocket);
 
 private:
     int _fd{0};

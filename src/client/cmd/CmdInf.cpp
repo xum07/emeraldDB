@@ -83,7 +83,7 @@ int ICmd::SendOrder(std::unique_ptr<Socket>& socket, int opCode)
     char* sendBuf = _sendBuff;
     auto str = "hello world";
     *(int*)sendBuf = strlen(str) + 1 + MSG_LENGTH_OCCUPY;
-    strcpy(&sendBuf[MSG_LENGTH_OCCUPY], str);
+    memcpy(&sendBuf[MSG_LENGTH_OCCUPY], str, strlen(str) + 1);
     /* MsgHeader *header = (MsgHeader*)pSendBuf;
     header->messageLen = sizeof(MsgHeader);
     header->opCode = opCode; */

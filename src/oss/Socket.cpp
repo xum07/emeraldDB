@@ -37,11 +37,10 @@ Socket::Socket(int fd, std::chrono::microseconds timeout)
     auto ret = getsockname(_fd, reinterpret_cast<sockaddr*>(&_localAddr), &_localAddrLen);
     if (ret != 0) {
         EMDB_LOG(E) << "failed to sock name, error=" << errno;
+        _init = false;
     } else {
         ret = getpeername(_fd, reinterpret_cast<sockaddr*>(&_peerAddr), &_peerAddrLen);
-        if (ret != 0) {
-            EMDB_LOG(E) << "failed to get peer name, error=" << errno;
-        }
+        EMDB_LOG_IF(E, ret != 0) << "failed to get peer name, error=" << errno;
     }
 }
 
@@ -93,15 +92,13 @@ int Socket::BindAndListen()
     // For database shutdown and restart right away, before socket close
     errno = 0;
     auto ret = setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &temp, sizeof(temp));
-    if (ret != 0) {
-        EMDB_LOG(E) << "failed to setsockopt SO_REUSEADDR, ret=" << ret << ", errno=" << errno;
-    }
+    EMDB_LOG_IF(E, ret != 0)
+        << "failed to setsockopt SO_REUSEADDR, ret=" << ret << ", errno=" << errno;
 
     constexpr int LINGER_TIME = 30;
     ret = SetSocketLinger(LINGER_TURN_ON, LINGER_TIME);
-    if (ret != 0) {
-        EMDB_LOG(E) << "failed to setsockopt SO_LINGER, ret=" << ret << ", errno=" << errno;
-    }
+    EMDB_LOG_IF(E, ret != 0)
+        << "failed to setsockopt SO_LINGER, ret=" << ret << ", errno=" << errno;
 
     ret = bind(_fd, reinterpret_cast<sockaddr*>(&_localAddr), _localAddrLen);
     if (ret != 0) {
@@ -125,9 +122,9 @@ int Socket::Send(const char* msg, int len, std::chrono::microseconds timeout, in
         return EDB_OK;
     }
 
-    auto ret = IsSocketReady(timeout);
+    auto ret = IsSocketReady(timeout, false);
     if (ret != EDB_OK) {
-        EMDB_LOG(E) << "socket is not ready, ret=" << ret;
+        EMDB_LOG(E) << "socket is not ready";
         return ret;
     }
 
@@ -160,9 +157,8 @@ int Socket::Receive(char* msg, int len, std::chrono::microseconds timeout, int f
         return EDB_OK;
     }
 
-    auto ret = IsSocketReady(timeout);
+    auto ret = IsSocketReady(timeout, true);
     if (ret != EDB_OK) {
-        EMDB_LOG(E) << "socket is not ready, ret=" << ret;
         return ret;
     }
 
@@ -208,9 +204,8 @@ int Socket::ReceiveWithoutFlag(char* msg, int len, std::chrono::microseconds tim
         return EDB_OK;
     }
 
-    auto ret = IsSocketReady(timeout);
+    auto ret = IsSocketReady(timeout, true);
     if (ret != EDB_OK) {
-        EMDB_LOG(E) << "socket is not ready, ret=" << ret;
         return ret;
     }
 
@@ -271,9 +266,8 @@ void Socket::Close()
 int Socket::Accept(int& sock, struct sockaddr* addr, socklen_t* addrlen,
                    std::chrono::microseconds timeout)
 {
-    auto ret = IsSocketReady(timeout);
+    auto ret = IsSocketReady(timeout, true);
     if (ret != EDB_OK) {
-        EMDB_LOG(E) << "socket is not ready, ret=" << ret;
         return ret;
     }
 
@@ -292,14 +286,10 @@ int Socket::DisableNagle()
     errno = 0;
     int temp = LINGER_TURN_ON;
     auto ret = setsockopt(_fd, IPPROTO_TCP, TCP_NODELAY, &temp, sizeof(temp));
-    if (ret != 0) {
-        EMDB_LOG(E) << "failed to setsockopt, ret=" << ret << ", errno=" << errno;
-    }
+    EMDB_LOG_IF(E, ret != 0) << "failed to setsockopt, ret=" << ret << ", errno=" << errno;
 
     ret = setsockopt(_fd, SOL_SOCKET, SO_KEEPALIVE, &temp, sizeof(temp));
-    if (ret != 0) {
-        EMDB_LOG(E) << "failed to setsockopt, ret=" << ret << ", errno=" << errno;
-    }
+    EMDB_LOG_IF(E, ret != 0) << "failed to setsockopt, ret=" << ret << ", errno=" << errno;
 
     return EDB_OK;
 }
@@ -342,14 +332,10 @@ int Socket::SetTimeout(std::chrono::seconds timeout)
 
     errno = 0;
     auto ret = setsockopt(_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
-    if (ret) {
-        EMDB_LOG(E) << "failed to setsockopt, ret=" << ret << ", errno=" << errno;
-    }
+    EMDB_LOG_IF(E, ret != 0) << "failed to setsockopt, ret=" << ret << ", errno=" << errno;
 
     ret = setsockopt(_fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
-    if (ret) {
-        EMDB_LOG(E) << "failed to setsockopt, ret=" << ret << ", errno=" << errno;
-    }
+    EMDB_LOG_IF(E, ret != 0) << "failed to setsockopt, ret=" << ret << ", errno=" << errno;
     return EDB_OK;
 }
 
@@ -369,15 +355,15 @@ int Socket::GetHostName(std::string& name)
 uint32_t Socket::GetPort(const std::string& serviceName)
 {
     auto servInfo = getservbyname(serviceName.data(), "tcp");
-    auto port = (servInfo == nullptr) ? atoi(serviceName.data()) : ntohs(servInfo->s_port);
+    auto port = (servInfo == nullptr) ? std::stoul(serviceName) : ntohs(servInfo->s_port);
     return port;
 }
 
-int Socket::IsSocketReady(std::chrono::microseconds& timeout)
+int Socket::IsSocketReady(std::chrono::microseconds& timeout, bool readFromSocket)
 {
     constexpr int SECOND_TO_MICROSECOND = 1000000;
     struct timeval maxSelectTime {};
-    maxSelectTime.tv_sec = duration_cast<seconds>(timeout).count() / SECOND_TO_MICROSECOND;
+    maxSelectTime.tv_sec = duration_cast<seconds>(timeout).count();
     maxSelectTime.tv_usec = timeout.count() % SECOND_TO_MICROSECOND;
 
     auto maxFd = _fd;
@@ -387,8 +373,10 @@ int Socket::IsSocketReady(std::chrono::microseconds& timeout)
         FD_ZERO(&fds);
         FD_SET(_fd, &fds);
         errno = 0;
-        auto ret = select(maxFd + 1, &fds, nullptr, nullptr,
-                          timeout.count() > 0 ? &maxSelectTime : nullptr);
+        auto ret = readFromSocket ? select(maxFd + 1, &fds, nullptr, nullptr,
+                                           timeout.count() > 0 ? &maxSelectTime : nullptr)
+                                  : select(maxFd + 1, nullptr, &fds, nullptr,
+                                           timeout.count() > 0 ? &maxSelectTime : nullptr);
         // 0 means timeout
         if (ret == 0) {
             return EDB_TIMEOUT;

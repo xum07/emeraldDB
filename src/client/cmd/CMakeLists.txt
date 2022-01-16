@@ -1,4 +1,4 @@
-add_library(client_cmd SHARED
+add_library(client_cmd OBJECT
   CmdInf.cpp
   TestCmd.cpp
   HelpCmd.cpp
