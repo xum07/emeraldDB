@@ -28,10 +28,6 @@
 #include "util/optime.h"
 #include "util/time_support.h"
 
-#ifndef log
-#define log(...) std::cerr
-#endif
-
 namespace bson {
 
     /**
@@ -61,7 +57,7 @@ namespace bson {
         case CodeWScope:
             return string(codeWScopeCode(), *(int*)(valuestr())-1);
         default:
-            log() << "can't convert type: " << (int)(type()) << " to code"
+            std::cerr << "can't convert type: " << (int)(type()) << " to code"
                   << endl;
         }
         uassert( 10062 ,  "not code" , 0 );

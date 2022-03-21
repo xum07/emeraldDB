@@ -363,8 +363,8 @@ namespace bson {
             if( dt > 0 && dt <= 0xffffffff ) {
                 static int n;
                 if( n++ == 0 )
-                    log() << "DEV WARNING appendDate() called with a tiny "
-                             "(but nonzero) date" << endl;
+                    std::cerr << "DEV WARNING appendDate() called with a tiny "
+                                 "(but nonzero) date" << endl;
             }
 #endif
             _b.appendNum((char) Date);
